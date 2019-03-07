@@ -1,0 +1,73 @@
+---
+title: "Hw4.Rmd"
+author: "Elaine OldBear"
+date: "3/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(datasets)
+library(ggplot2)
+library(ggmosaic)
+str(ChickWeight)
+?ChickWeight
+```
+
+### 1. Get a frequency breakdown of the number of chicks, their average weight and the standard deviation of the weights in each of the diets at the start of the study. Store the resulting data frame in a variable named 'weight0' and print
+```{r}
+#chick1 <- ChickWeight %>%
+#  select(Chick, weight, Diet)
+#chick1
+#weight0 <- chick1 %>%
+#  group_by(Chick, Diet) %>%
+#  summarize(mean_rate = mean(weight,
+#                             na.rm=TRUE),
+#            sd_rate = sd(weight,
+#                         na.rm = TRUE),
+#            nrows = n() )
+#weight0
+
+weight0 <- ChickWeight %>%
+  group_by(Diet) %>%
+  summarize(numChicks=n(), avg_wt = mean(weight,
+                             na.rm=TRUE),
+            sd_wt = sd(weight,
+                         na.rm = TRUE))
+weight0
+```
+
+### 2. Each chick should have 12 weight measurements. Use the dplyr package to identify how many measurements there are for each chick. Extract a subset of the data for all chicks with complete information, name the dataset 'complete' and print the first 3 rows (Hint: you might want to use mutate to introduce a helper variable consisting of the nunber of observations.)
+```{r}
+#complete <- ChickWeight %>% group_by(Chick %>% )
+
+#complete <- ChickWeight %>% group_by(Chick) %>% mutate(n = filter(n() == 12))
+complete
+complete <- ChickWeight %>% group_by(Chick) %>% mutate(n = n()) %>% filter(n() == 12)
+print(head(complete, 3))
+```
+
+### 3. In the complete data set introduce a new variable that measures the current weight difference compared to day 0. Name this variable 'weightgain' and print the first 3 variables of the new data frame.
+```{r}
+complete <- complete %>% group_by(Chick) %>% 
+  mutate(weightd0 = weight[Time == 0]) %>%
+  mutate(weightgain = weight[Time == 21] - weightd0)
+print(head(complete, 3))
+```
+
+### 4. Use ggplot2 to create side-by-side boxplots of weightgain by Diet for day 21. Describe the relationship in 2-3 sentences. Change the order of the categories in the Diet variable such that the boxplots are ordered by median 'weightgain', and the lower limit of the y-axis should be 0.
+
+##DESCRIBE RELATIONSHIP: Diet 2 and 3 look as though they have the same sized 'box' or IQR but they vary with the highest and lowest points. Diet 4 looks like it has the lowest weight gain out of all diets. 
+```{r}
+day21 <- complete %>%
+  mutate(weightgain = weight[Time == 21])
+day21
+
+day21 %>% ggplot(aes(x= reorder(Diet, weightgain, FUN= median), y=weightgain)) +
+  geom_boxplot() +
+  ggtitle("Weight Gain x Diet on day 21") + xlab("Diet") + ylab("Weight Gain")
+```
