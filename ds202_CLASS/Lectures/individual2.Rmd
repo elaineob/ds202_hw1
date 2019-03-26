@@ -1,29 +1,59 @@
 ---
 title: "individual2.Rmd"
 author: "Elaine"
-date: "2/5/2019"
+date: "3/26/2019"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyverse)
+defense <- read_excel('cyclonesFootball2018.xlsx', sheet='Defensive')
+str(defense)
 
-## R Markdown
+offense <- read_excel('cyclonesFootball2018.xlsx', sheet='Offensive')
+str(offense)
 
-
-```{r cars}
-summary(cars)
+biography <- read_excel('cyclonesFootball2018.xlsx', sheet='Biography')
+str(biography)
 ```
 
-choco <- read.csv("https://xdaiisu.github.io/ds202materials/hwlabs/choco.csv")
-head(choco)
-View(choco)
-hist(choco$Rating)
-#Most of the ratings are between 2-4. There does seem to be outlier(s) present on the higher end of the ratings.
+?mutate_at
+```{r}
+defClean <- defense %>%
+  mutate(Name = as.factor(Name),
+         Opponent_Opponent = as.factor(Opponent_Opponent)) %>%
+  mutate_if(is.character,as.numeric)
+str(defClean)
+print(str(defClean))
 
-cor(choco$Rating, choco$Cocoa.Pct)
-#No I don't think the ratings depend on cocoa percentage
+offClean <- offense %>%
+  mutate(Name = as.factor(Name),
+         Opponent_Opponent = as.factor(Opponent_Opponent)) %>%
+  mutate_if(is.character,as.numeric, na.rm=TRUE)
+str(offClean)
+print(str(offClean))
 
 
+bioClean <- biography %>%
+  mutate(Name = as.factor(Name),
+         Weight = as.numeric(Weight)) %>%
+  separate(Height, c('feet', 'inches'), "-", convert=TRUE) %>%
+  mutate(Height = (12*feet + inches)*2.54)
+str(bioClean)
+print(str(bioClean))
+```
 
+```{r}
+#Part two: Tidying (1)
+defClean <- defClean %>% gather(key=Statistic, value=Count, 3:11)
+defClean
+
+ggplot(defClean, aes(x=Count, fill=Statistic)) + geom_histogram(binwidth=0.5) +
+  facet_wrap(~Statistic)
+
+```
